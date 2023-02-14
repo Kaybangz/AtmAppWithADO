@@ -12,7 +12,7 @@ namespace AtmClient
         {
             IAtmService atmService = new AtmService();
 
-            atmService.Deposit(2345);
+            atmService.Deposit(2345, 0);
 
             //Console.WriteLine(result);
         }

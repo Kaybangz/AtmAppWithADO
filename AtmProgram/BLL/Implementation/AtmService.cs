@@ -33,7 +33,7 @@ namespace AtmApp.Atm.BLL.Implementation
 
                 long accountBalance = (long)myCommand.ExecuteScalar();
 
-                if(depositAmount < 0 || depositAmount.GetType() is String)
+                if(depositAmount <= 0 || depositAmount.GetType() is String)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Amount must be a number and must be greater than zero\n");
@@ -44,9 +44,32 @@ namespace AtmApp.Atm.BLL.Implementation
 
                 decimal getUpdatedBalance = accountBalance + depositAmount;
 
-                string updateDepositTransactions = @"INSERT INTO DepositTransaction";
+                string updateCustomer = @"UPDATE Customers SET AccountBalance = @AccountBalance WHERE Pin = @Pin";
 
-                
+                myCommand = new SqlCommand(updateCustomer, connection);
+
+                myCommand.Parameters.AddRange(new SqlParameter[]
+                {
+                    new SqlParameter
+                    {
+                        ParameterName = "@AccountBalance",
+                        Value = getUpdatedBalance,
+                        SqlDbType = SqlDbType.BigInt,
+                        Direction = ParameterDirection.Input
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Pin",
+                        Value = pin,
+                        SqlDbType = SqlDbType.SmallInt,
+                        Direction = ParameterDirection.Input
+                    }
+                });
+
+                myCommand.ExecuteNonQuery();
+
+                Console.WriteLine("Deposit successful");
             }
         }
 
