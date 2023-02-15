@@ -1,8 +1,4 @@
-﻿using AtmApp.Atm.BLL.Implementation;
-using AtmApp.Atm.BLL.Interface;
-using AtmApp.Atm.Data.DataStore;
-using AtmApp.BLL.Implementation;
-using AtmApp.UI;
+﻿using AtmApp.UI;
 
 namespace AtmClient
 {
@@ -10,11 +6,7 @@ namespace AtmClient
     {
         static async Task Main(string[] args)
         {
-            IAtmService atmService = new AtmService();
-
-            atmService.Deposit(2345, 0);
-
-            //Console.WriteLine(result);
+            Presentation.RunViewAccountDetails(2345);
         }
     }
 }

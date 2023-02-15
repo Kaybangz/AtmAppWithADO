@@ -14,7 +14,7 @@ namespace AtmApp.Atm.BLL.Interface
         //Transfer
         //Account details
         Task<long> CreateNewAccount(CustomerModel customer);
-        void ViewAccountDetails(int pin);
+        CustomerModel ViewAccountDetails(int pin);
         void Deposit(int pin, decimal depositAmount);
         void Withdraw(int pin, decimal amount);
         void Transfer(int pin);

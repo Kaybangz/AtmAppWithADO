@@ -3,7 +3,6 @@ using AtmApp.Atm.Data.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
-using System.Data.SqlTypes;
 using System.Threading.Tasks;
 
 
@@ -24,7 +23,7 @@ namespace AtmApp.Atm.BLL.Implementation
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
-                
+
                 string getAccountBalance = @"SELECT AccountBalance FROM Customers WHERE Pin = @Pin";
 
                 SqlCommand myCommand = new SqlCommand(getAccountBalance, connection);
@@ -33,7 +32,9 @@ namespace AtmApp.Atm.BLL.Implementation
 
                 long accountBalance = (long)myCommand.ExecuteScalar();
 
-                if(depositAmount <= 0 || depositAmount.GetType() is String)
+
+                //Move to presentation
+                if (depositAmount <= 0 || depositAmount.GetType() is String)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Amount must be a number and must be greater than zero\n");
@@ -69,26 +70,72 @@ namespace AtmApp.Atm.BLL.Implementation
 
                 myCommand.ExecuteNonQuery();
 
-                Console.WriteLine("Deposit successful");
+                string transactionQuery = @"INSERT INTO CustomersTransactions (TransactionType, TransactionTime) VALUES ()";
+
+                //string insertIntoDepositTransaction = @"INSERT INTO DepositTransaction (customer_Id, Firstname, Lastname, AccountNumber, AccountType, TransactionType, TransactionTime) ";
+
+                //                string transactionQuery = @"SELECT 
+                //                Customers.customer_Id, 
+                //                Customers.Firstname, 
+                //                Customers.Lastname, 
+                //                Customers.AccountNumber, 
+                //                Customers.AccountType,
+
+                //INTO
+                //CustomersTransactions
+                //FROM
+                //Customers
+                //LEFT JOIN Customers ON CustomersTransactions.customer_Id = Customers.customer_Id";
             }
         }
 
-        public void Dispose()
+
+        public void Withdraw(int pin, decimal amount)
         {
             throw new NotImplementedException();
         }
+
 
         public void Transfer(int pin)
         {
             throw new NotImplementedException();
         }
 
-        public void ViewAccountDetails(int pin)
+        public CustomerModel ViewAccountDetails(int pin)
         {
-            throw new NotImplementedException();
+            using (SqlConnection connection = new SqlConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+
+                string getAccountDetails = @"SELECT Firstname,Lastname,Phonenumber,Gender,Bank,AccountNumber,AccountType,AccountBalance FROM Customers WHERE Pin = @Pin";
+
+                SqlCommand myCommand = new SqlCommand(getAccountDetails, connection);
+
+                myCommand.Parameters.Add("@Pin", SqlDbType.SmallInt).Value = pin;
+
+                CustomerModel customer = new CustomerModel();
+
+                using (SqlDataReader dataReader = myCommand.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+                        customer.FirstName = dataReader["Firstname"].ToString();
+                        customer.LastName = dataReader["Lastname"].ToString();
+                        customer.PhoneNumber = dataReader["Phonenumber"].ToString();
+                        customer.Gender = dataReader["Gender"].ToString();
+                        customer.Bank = dataReader["Bank"].ToString();
+                        customer.AccountNumber = dataReader["AccountNumber"].ToString();
+                        customer.AccountType = dataReader["AccountType"].ToString();
+                        customer.AccountBalance = (long)dataReader["AccountBalance"];
+                    }
+                }
+
+                return customer;
+            }
         }
 
-        public void Withdraw(int pin, decimal amount)
+        public void Dispose()
         {
             throw new NotImplementedException();
         }
