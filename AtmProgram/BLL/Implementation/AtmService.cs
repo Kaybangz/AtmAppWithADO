@@ -3,7 +3,6 @@ using AtmApp.Atm.Data.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
-using System.Threading.Tasks;
 
 
 namespace AtmApp.Atm.BLL.Implementation
@@ -12,11 +11,11 @@ namespace AtmApp.Atm.BLL.Implementation
     {
         private readonly string _connectionString = @"Data Source=KAYBANGZ;Initial Catalog=AtmAppDatabase;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
-        
+
 
         public long CreateNewAccount(CustomerModel customer)
         {
-            using(SqlConnection connection = new SqlConnection())
+            using (SqlConnection connection = new SqlConnection())
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
@@ -113,6 +112,8 @@ namespace AtmApp.Atm.BLL.Implementation
             }
         }
 
+
+
         public void Withdraw(int pin, decimal amountToWithdraw)
         {
             using (SqlConnection connection = new SqlConnection())
@@ -129,11 +130,12 @@ namespace AtmApp.Atm.BLL.Implementation
                 long accountBalance = (long)myCommand.ExecuteScalar();
 
 
-                //Move to presentation
-                if (amountToWithdraw <= 0 || amountToWithdraw.GetType() is String)
+
+                
+                if (amountToWithdraw > accountBalance)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Amount must be a number and must be greater than zero\n");
+                    Console.WriteLine("Insufficient balance...\n");
                     Console.ForegroundColor = ConsoleColor.White;
 
                     return;
@@ -165,6 +167,27 @@ namespace AtmApp.Atm.BLL.Implementation
                 });
 
                 myCommand.ExecuteNonQuery();
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Withdrawal successful\n");
+                Console.ForegroundColor = ConsoleColor.White;
+
+
+
+                //string updateWithdrawTable = @"INSERT INTO WithdrawTransactions (Firstname, Lastname, AccountNumber, AccountType) SELECT (Firstname, Lastname, AccountNumber, AccountType) FROM Customers WHERE Pin = @Pin; ";
+
+                //myCommand = new SqlCommand(updateWithdrawTable, connection);
+
+                //myCommand.Parameters.AddRange(new SqlParameter[]
+                //{
+                //    new SqlParameter
+                //    {
+                //        ParameterName = "@Pin",
+                //        Value = pin,
+                //        SqlDbType = SqlDbType.SmallInt,
+                //        Direction = ParameterDirection.Input
+                //    }
+                //});
             }
         }
 

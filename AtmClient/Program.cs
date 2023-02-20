@@ -4,11 +4,13 @@ namespace AtmClient
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             //Presentation.RunViewAccountDetails(2345);
 
-            Presentation.RunCreateNewAccount();
+            //Presentation.RunCreateNewAccount();
+
+            //Presentation.RunWithdraw(2345);
         }
     }
 }

@@ -2,6 +2,8 @@
 using AtmApp.Atm.Data.Models;
 using AtmApp.BLL.HelperFunctions;
 using System;
+using System.Threading.Tasks;
+using System.Threading;
 
 
 namespace AtmApp.UI
@@ -66,11 +68,11 @@ namespace AtmApp.UI
 
                 string accountType;
 
-                if(accountTypeSelect == 1)
+                if (accountTypeSelect == 1)
                 {
                     accountType = "Savings";
                 }
-                else if(accountTypeSelect == 2)
+                else if (accountTypeSelect == 2)
                 {
                     accountType = "Current";
                 }
@@ -122,7 +124,7 @@ namespace AtmApp.UI
                     Console.WriteLine("Something went wrong...\n");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
-                
+
             }
         }
 
@@ -133,23 +135,48 @@ namespace AtmApp.UI
         {
             try
             {
-                Console.WriteLine("Enter amount to withdraw: ");
-                decimal amount = Convert.ToDecimal(Console.Read());
+                Console.Write("Enter amount to withdraw: ");
+                decimal amount = Convert.ToDecimal(Console.ReadLine());
 
+                if ((amount <= 0) || (amount.GetType() is String))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Amount must be a number and must be greater than zero...\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    return;
+                }
+
+                Thread.Sleep(500);
+
+                Console.WriteLine("Please wait...\n");
+
+                Thread.Sleep(2000);
 
                 AtmService atmService = new AtmService();
 
                 atmService.Withdraw(pin, amount);
 
 
-                Console.WriteLine("Withdrawal successful");
             }
             catch (Exception ex)
             {
 
-                if (ex is FormatException) Console.WriteLine("Invalid input...");
-                if (ex is NullReferenceException) Console.WriteLine("Must enter an input...");
-                if (ex is Exception) Console.WriteLine("Something went wrong...");
+                if (ex is FormatException)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Invalid input...\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                else if (ex is NullReferenceException)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Must enter an input...\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Something went wrong...\n");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
         }
@@ -164,8 +191,10 @@ namespace AtmApp.UI
             var customer = atmService.ViewAccountDetails(pin);
 
 
+            DateTime dateTime = DateTime.Now;
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"\n*****************\nFirstname: {customer.FirstName}\nLastname: {customer.LastName}\nAccountNumber: {customer.AccountNumber}\nAccountType: {customer.AccountType}\nAccountBalance: {customer.AccountBalance}\n\n*****************\n");
+            Console.WriteLine($"\n*****************\nFirstname: {customer.FirstName}\nLastname: {customer.LastName}\nAccountNumber: {customer.AccountNumber}\nAccountType: {customer.AccountType}\nAccountBalance: {customer.AccountBalance}\nTime: {dateTime}\n\n*****************\n");
             Console.ForegroundColor = ConsoleColor.White;
         }
     }
