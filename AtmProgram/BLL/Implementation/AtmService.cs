@@ -12,12 +12,108 @@ namespace AtmApp.Atm.BLL.Implementation
     {
         private readonly string _connectionString = @"Data Source=KAYBANGZ;Initial Catalog=AtmAppDatabase;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
-        public Task<long> CreateNewAccount(CustomerModel customer)
+        
+
+        public long CreateNewAccount(CustomerModel customer)
         {
-            throw new NotImplementedException();
+            using(SqlConnection connection = new SqlConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+
+                string createCustomerQuery = @"INSERT INTO Customers (Pin, Firstname, Lastname, Phonenumber, Gender, Bank, AccountNumber, AccountType, AccountBalance) VALUES (@pin, @Firstname, @Lastname, @Phonenumber, @Gender, @Bank, @AccountNumber, @AccountType, @AccountBalance)";
+
+                SqlCommand myCommand = new SqlCommand(createCustomerQuery, connection);
+
+                myCommand.Parameters.AddRange(new SqlParameter[]
+                {
+                    new SqlParameter
+                    {
+                        ParameterName = "@Pin",
+                        Value = customer.Pin,
+                        SqlDbType = SqlDbType.SmallInt,
+                        Direction = ParameterDirection.Input
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Firstname",
+                        Value = customer.FirstName,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 20
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Lastname",
+                        Value = customer.LastName,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 20
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Phonenumber",
+                        Value = customer.PhoneNumber,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 20
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Gender",
+                        Value = customer.Gender,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 10
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Bank",
+                        Value = customer.Bank,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 30
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@AccountNumber",
+                        Value = customer.AccountNumber,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 20
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@AccountType",
+                        Value = customer.AccountType,
+                        SqlDbType = SqlDbType.NVarChar,
+                        Direction = ParameterDirection.Input,
+                        Size = 20
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@AccountBalance",
+                        Value = customer.AccountBalance,
+                        SqlDbType = SqlDbType.BigInt,
+                        Direction = ParameterDirection.Input,
+                    },
+                });
+
+                long customerId = (long)myCommand.ExecuteScalar();
+
+                return customerId;
+            }
         }
 
-        public void Deposit(int pin, decimal depositAmount)
+        public void Withdraw(int pin, decimal amountToWithdraw)
         {
             using (SqlConnection connection = new SqlConnection())
             {
@@ -34,7 +130,7 @@ namespace AtmApp.Atm.BLL.Implementation
 
 
                 //Move to presentation
-                if (depositAmount <= 0 || depositAmount.GetType() is String)
+                if (amountToWithdraw <= 0 || amountToWithdraw.GetType() is String)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Amount must be a number and must be greater than zero\n");
@@ -43,7 +139,7 @@ namespace AtmApp.Atm.BLL.Implementation
                     return;
                 }
 
-                decimal getUpdatedBalance = accountBalance + depositAmount;
+                decimal getUpdatedBalance = accountBalance - amountToWithdraw;
 
                 string updateCustomer = @"UPDATE Customers SET AccountBalance = @AccountBalance WHERE Pin = @Pin";
 
@@ -69,37 +165,20 @@ namespace AtmApp.Atm.BLL.Implementation
                 });
 
                 myCommand.ExecuteNonQuery();
-
-                string transactionQuery = @"INSERT INTO CustomersTransactions (TransactionType, TransactionTime) VALUES ()";
-
-                //string insertIntoDepositTransaction = @"INSERT INTO DepositTransaction (customer_Id, Firstname, Lastname, AccountNumber, AccountType, TransactionType, TransactionTime) ";
-
-                //                string transactionQuery = @"SELECT 
-                //                Customers.customer_Id, 
-                //                Customers.Firstname, 
-                //                Customers.Lastname, 
-                //                Customers.AccountNumber, 
-                //                Customers.AccountType,
-
-                //INTO
-                //CustomersTransactions
-                //FROM
-                //Customers
-                //LEFT JOIN Customers ON CustomersTransactions.customer_Id = Customers.customer_Id";
             }
         }
 
 
-        public void Withdraw(int pin, decimal amount)
-        {
-            throw new NotImplementedException();
-        }
+
 
 
         public void Transfer(int pin)
         {
             throw new NotImplementedException();
         }
+
+
+
 
         public CustomerModel ViewAccountDetails(int pin)
         {
@@ -134,6 +213,8 @@ namespace AtmApp.Atm.BLL.Implementation
                 return customer;
             }
         }
+
+
 
         public void Dispose()
         {
