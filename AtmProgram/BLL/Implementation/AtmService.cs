@@ -1,5 +1,6 @@
 ﻿using AtmApp.Atm.BLL.Interface;
 using AtmApp.Atm.Data.Models;
+using AtmApp.DAL.Models;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
@@ -169,25 +170,18 @@ namespace AtmApp.Atm.BLL.Implementation
                 myCommand.ExecuteNonQuery();
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Withdrawal successful\n");
+                Console.WriteLine($"#{amountToWithdraw} withdrawn successfully\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
 
 
-                //string updateWithdrawTable = @"INSERT INTO WithdrawTransactions (Firstname, Lastname, AccountNumber, AccountType) SELECT (Firstname, Lastname, AccountNumber, AccountType) FROM Customers WHERE Pin = @Pin; ";
+                //string updateWithdrawTable = @"INSERT INTO WithdrawTransactions (customer_Id, Firstname, Lastname, AccountNumber, AccountType, TransactionType, TransactionTime) SELECT (customer_Id, Firstname, Lastname, AccountNumber, AccountType, TransactionType, TransactionTime) FROM Customers WHERE Pin = @Pin";
 
                 //myCommand = new SqlCommand(updateWithdrawTable, connection);
 
-                //myCommand.Parameters.AddRange(new SqlParameter[]
-                //{
-                //    new SqlParameter
-                //    {
-                //        ParameterName = "@Pin",
-                //        Value = pin,
-                //        SqlDbType = SqlDbType.SmallInt,
-                //        Direction = ParameterDirection.Input
-                //    }
-                //});
+                //myCommand.Parameters.Add("@Pin", SqlDbType.SmallInt).Value = pin;
+
+                //myCommand.ExecuteNonQuery();
             }
         }
 
@@ -195,9 +189,59 @@ namespace AtmApp.Atm.BLL.Implementation
 
 
 
-        public void Transfer(int pin)
+        public void Transfer(int pin, RecipientModel recipient)
         {
-            throw new NotImplementedException();
+            using (SqlConnection connection = new SqlConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+
+                string getAccountBalance = @"SELECT AccountBalance FROM Customers WHERE Pin = @Pin";
+
+                SqlCommand myCommand = new SqlCommand(getAccountBalance, connection);
+
+                myCommand.Parameters.Add("@Pin", SqlDbType.SmallInt).Value = pin;
+
+                long accountBalance = (long)myCommand.ExecuteScalar();
+
+                if (recipient.TransferAmount > accountBalance)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Insufficient balance...\n");
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    return;
+                }
+
+                decimal getUpdatedBalance = accountBalance - recipient.TransferAmount;
+
+                string updateCustomer = @"UPDATE Customers SET AccountBalance = @AccountBalance WHERE Pin = @Pin";
+
+                myCommand = new SqlCommand(updateCustomer, connection);
+
+                myCommand.Parameters.AddRange(new SqlParameter[]
+                {
+                    new SqlParameter
+                    {
+                        ParameterName = "@AccountBalance",
+                        Value = getUpdatedBalance,
+                        SqlDbType = SqlDbType.BigInt,
+                        Direction = ParameterDirection.Input
+                    },
+
+                    new SqlParameter
+                    {
+                        ParameterName = "@Pin",
+                        Value = pin,
+                        SqlDbType = SqlDbType.SmallInt,
+                        Direction = ParameterDirection.Input
+                    }
+                });
+
+
+
+                myCommand.ExecuteNonQuery();
+            }
         }
 
 

@@ -133,8 +133,7 @@ namespace AtmApp.UI
 
         public static void RunWithdraw(int pin)
         {
-            try
-            {
+            
                 Console.Write("Enter amount to withdraw: ");
                 decimal amount = Convert.ToDecimal(Console.ReadLine());
 
@@ -156,28 +155,6 @@ namespace AtmApp.UI
                 AtmService atmService = new AtmService();
 
                 atmService.Withdraw(pin, amount);
-
-
-            }
-            catch (Exception ex)
-            {
-
-                if (ex is FormatException)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid input...\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                else if (ex is NullReferenceException)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Must enter an input...\n");
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Something went wrong...\n");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
 
         }
 

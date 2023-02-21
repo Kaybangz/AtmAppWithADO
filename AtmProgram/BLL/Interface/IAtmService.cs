@@ -1,4 +1,5 @@
 ﻿using AtmApp.Atm.Data.Models;
+using AtmApp.DAL.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,6 @@ namespace AtmApp.Atm.BLL.Interface
         long CreateNewAccount(CustomerModel customer);
         CustomerModel ViewAccountDetails(int pin);
         void Withdraw(int pin, decimal amount);
-        void Transfer(int pin);
+        void Transfer(int pin, RecipientModel recipient);
     }
 }
